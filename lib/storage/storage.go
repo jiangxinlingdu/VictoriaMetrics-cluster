@@ -1506,6 +1506,7 @@ func (s *Storage) AddRows(mrs []MetricRow, precisionBits uint8) error {
 		} else {
 			mrs = nil
 		}
+		//storage 进行 add 操作(核心逻辑
 		if err := s.add(ic.rrs, ic.tmpMrs, mrsBlock, precisionBits); err != nil {
 			if firstErr == nil {
 				firstErr = err
@@ -1514,6 +1515,8 @@ func (s *Storage) AddRows(mrs []MetricRow, precisionBits uint8) error {
 		}
 		atomic.AddUint64(&rowsAddedTotal, uint64(len(mrsBlock)))
 	}
+
+	//从池里面拿了 再放回去
 	putMetricRowsInsertCtx(ic)
 
 	<-addRowsConcurrencyCh
@@ -1529,6 +1532,7 @@ type metricRowsInsertCtx struct {
 func getMetricRowsInsertCtx() *metricRowsInsertCtx {
 	v := metricRowsInsertCtxPool.Get()
 	if v == nil {
+		//进行初始化操作
 		v = &metricRowsInsertCtx{
 			rrs:    make([]rawRow, maxMetricRowsPerBlock),
 			tmpMrs: make([]*MetricRow, maxMetricRowsPerBlock),
@@ -1623,6 +1627,8 @@ func (s *Storage) RegisterMetricNames(mrs []MetricRow) error {
 }
 
 func (s *Storage) add(rows []rawRow, dstMrs []*MetricRow, mrs []MetricRow, precisionBits uint8) error {
+	//获取 storage 的 idb
+	//	idbPath := path + "/indexdb" 其实就是 indexdb
 	idb := s.idb()
 	j := 0
 	var (
