@@ -49,6 +49,7 @@ var (
 		"Excess series are logged and dropped. This can be useful for limiting series churn rate. See also -storage.maxHourlySeries")
 )
 
+//vmstorage 入口
 func main() {
 	// Write flags and help message to stdout, since it is easier to grep or pipe.
 	flag.CommandLine.SetOutput(os.Stdout)
@@ -65,6 +66,7 @@ func main() {
 
 	logger.Infof("opening storage at %q with -retentionPeriod=%s", *storageDataPath, retentionPeriod)
 	startTime := time.Now()
+	//启动就打开 存储
 	strg, err := storage.OpenStorage(*storageDataPath, retentionPeriod.Msecs, *maxHourlySeries, *maxDailySeries)
 	if err != nil {
 		logger.Fatalf("cannot open a storage at %s with -retentionPeriod=%s: %s", *storageDataPath, retentionPeriod, err)
@@ -88,8 +90,7 @@ func main() {
 		logger.Fatalf("cannot create a server with vminsertAddr=%s, vmselectAddr=%s: %s", *vminsertAddr, *vmselectAddr, err)
 	}
 
-
-	//开启协程
+	//开启协程  处理插入逻辑
 	go srv.RunVMInsert()
 	go srv.RunVMSelect()
 

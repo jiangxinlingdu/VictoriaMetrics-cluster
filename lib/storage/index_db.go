@@ -135,6 +135,7 @@ func openIndexDB(path string, metricIDCache, metricNameCache, tsidCache *working
 		logger.Panicf("BUG: tsidCache must be nin-nil")
 	}
 
+	//打开表
 	tb, err := mergeset.OpenTable(path, invalidateTagCache, mergeTagToMetricIDsRows)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open indexDB %q: %w", path, err)

@@ -134,6 +134,12 @@ type accountProjectKey struct {
 }
 
 // OpenStorage opens storage on the given path with the given retentionMsecs.
+/**
+path string storage 存储路径
+retentionMsecs int64 数据保持多久删除（单位 s）
+maxHourlySeries 一小时 最多存储多少
+maxDailySeries int 24 小时最多存储多少时序
+*/
 func OpenStorage(path string, retentionMsecs int64, maxHourlySeries, maxDailySeries int) (*Storage, error) {
 	path, err := filepath.Abs(path)
 	if err != nil {
@@ -152,11 +158,13 @@ func OpenStorage(path string, retentionMsecs int64, maxHourlySeries, maxDailySer
 
 		stop: make(chan struct{}),
 	}
+	//如果给定 path 不存在这创建
 	if err := fs.MkdirAllIfNotExist(path); err != nil {
 		return nil, fmt.Errorf("cannot create a directory for the storage at %q: %w", path, err)
 	}
 
 	// Protect from concurrent opens.
+	//并发控制 文件锁
 	flockF, err := fs.CreateFlockFile(path)
 	if err != nil {
 		return nil, err
@@ -164,12 +172,14 @@ func OpenStorage(path string, retentionMsecs int64, maxHourlySeries, maxDailySer
 	s.flockF = flockF
 
 	// Pre-create snapshots directory if it is missing.
+	//预创建 快照目录如果不存在的话
 	snapshotsPath := path + "/snapshots"
 	if err := fs.MkdirAllIfNotExist(snapshotsPath); err != nil {
 		return nil, fmt.Errorf("cannot create %q: %w", snapshotsPath, err)
 	}
 
 	// Initialize series cardinality limiter.
+	//初始化时序限制
 	if maxHourlySeries > 0 {
 		s.hourlySeriesLimiter = bloomfilter.NewLimiter(maxHourlySeries, time.Hour)
 	}
@@ -211,6 +221,7 @@ func OpenStorage(path string, retentionMsecs int64, maxHourlySeries, maxDailySer
 	if err := fs.MkdirAllIfNotExist(idbSnapshotsPath); err != nil {
 		return nil, fmt.Errorf("cannot create %q: %w", idbSnapshotsPath, err)
 	}
+	//打开索引 db 表
 	idbCurr, idbPrev, err := openIndexDBTables(idbPath, s.metricIDCache, s.metricNameCache, s.tsidCache, s.minTimestampForCompositeIndex)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open indexdb tables at %q: %w", idbPath, err)
@@ -1605,6 +1616,7 @@ func (s *Storage) RegisterMetricNames(mrs []MetricRow) error {
 		is.projectID = 0
 
 		// The metric must be added to cache only after it has been successfully added to indexDB.
+		//指标必须在成功添加到 indexDB 之后假如到缓存
 		s.dateMetricIDCache.Set(date, metricID)
 	}
 	return nil
@@ -2334,9 +2346,11 @@ func openIndexDBTables(path string, metricIDCache, metricNameCache, tsidCache *w
 	if len(tableNames) < 2 {
 		// Create missing tables
 		if len(tableNames) == 0 {
+			//16 进制当前时间戳
 			prevName := nextIndexDBTableName()
 			tableNames = append(tableNames, prevName)
 		}
+		//16 进制当前时间戳
 		currName := nextIndexDBTableName()
 		tableNames = append(tableNames, currName)
 	}
@@ -2355,12 +2369,15 @@ func openIndexDBTables(path string, metricIDCache, metricNameCache, tsidCache *w
 	fs.MustSyncPath(path)
 
 	// Open the last two tables.
+	//打开 下标为 1 的索引文件
 	currPath := path + "/" + tableNames[len(tableNames)-1]
 
+	//打开索引
 	curr, err = openIndexDB(currPath, metricIDCache, metricNameCache, tsidCache, minTimestampForCompositeIndex)
 	if err != nil {
 		return nil, nil, fmt.Errorf("cannot open curr indexdb table at %q: %w", currPath, err)
 	}
+	//打开下标为 0 的索引文件
 	prevPath := path + "/" + tableNames[len(tableNames)-2]
 	prev, err = openIndexDB(prevPath, metricIDCache, metricNameCache, tsidCache, minTimestampForCompositeIndex)
 	if err != nil {

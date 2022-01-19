@@ -140,6 +140,7 @@ var rawItemsShardsPerTable = cgroup.AvailableCPUs()
 const maxBlocksPerShard = 512
 
 func (riss *rawItemsShards) init() {
+	//通过内置函数make()初始化
 	riss.shards = make([]rawItemsShard, rawItemsShardsPerTable)
 }
 
@@ -273,6 +274,7 @@ func OpenTable(path string, flushCallback func(), prepareBlock PrepareBlockCallb
 	}
 
 	// Open table parts.
+	//打开表的 parts
 	pws, err := openParts(path)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open table parts at %q: %w", path, err)
@@ -288,6 +290,7 @@ func OpenTable(path string, flushCallback func(), prepareBlock PrepareBlockCallb
 		stopCh:        make(chan struct{}),
 	}
 	tb.rawItems.init()
+	//开启定时器
 	tb.startPartMergers()
 	tb.startRawItemsFlusher()
 
@@ -297,6 +300,7 @@ func OpenTable(path string, flushCallback func(), prepareBlock PrepareBlockCallb
 		path, time.Since(startTime).Seconds(), m.PartsCount, m.BlocksCount, m.ItemsCount, m.SizeBytes)
 
 	tb.convertersWG.Add(1)
+	//开启协程
 	go func() {
 		tb.convertToV1280()
 		tb.convertersWG.Done()
@@ -470,6 +474,7 @@ func (tb *Table) putParts(pws []*partWrapper) {
 
 func (tb *Table) startRawItemsFlusher() {
 	tb.rawItemsFlusherWG.Add(1)
+	//开启协程
 	go func() {
 		tb.rawItemsFlusher()
 		tb.rawItemsFlusherWG.Done()
@@ -744,6 +749,7 @@ func (tb *Table) mergeInmemoryBlocks(blocksToMerge []*inmemoryBlock) *partWrappe
 func (tb *Table) startPartMergers() {
 	for i := 0; i < mergeWorkersCount; i++ {
 		tb.partMergersWG.Add(1)
+		//开启协程
 		go func() {
 			if err := tb.partMerger(); err != nil {
 				logger.Panicf("FATAL: unrecoverable error when merging parts in %q: %s", tb.path, err)
@@ -1052,6 +1058,7 @@ func openParts(path string) ([]*partWrapper, error) {
 	// Run remaining transactions and cleanup /txn and /tmp directories.
 	// Snapshots cannot be created yet, so use fakeSnapshotLock.
 	var fakeSnapshotLock sync.RWMutex
+	//运行事务
 	if err := runTransactions(&fakeSnapshotLock, path); err != nil {
 		return nil, fmt.Errorf("cannot run transactions: %w", err)
 	}
@@ -1202,6 +1209,7 @@ func runTransactions(txnLock *sync.RWMutex, path string) error {
 	// Make sure all the current transaction deletions are finished before exiting.
 	defer pendingTxnDeletionsWG.Wait()
 
+	//事务目录
 	txnDir := path + "/txn"
 	d, err := os.Open(txnDir)
 	if err != nil {
@@ -1212,6 +1220,7 @@ func runTransactions(txnLock *sync.RWMutex, path string) error {
 	}
 	defer fs.MustClose(d)
 
+	//读文件夹
 	fis, err := d.Readdir(-1)
 	if err != nil {
 		return fmt.Errorf("cannot read directory %q: %w", d.Name(), err)
