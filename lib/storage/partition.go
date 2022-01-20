@@ -434,6 +434,7 @@ func (pt *partition) AddRows(rows []rawRow) {
 		}
 	}
 
+	//添加
 	pt.rawRows.addRows(pt, rows)
 }
 
@@ -453,6 +454,7 @@ func (rrss *rawRowsShards) addRows(pt *partition, rows []rawRow) {
 	shards := rrss.shards
 	idx := n % uint32(len(shards))
 	shard := &shards[idx]
+	//添加
 	shard.addRows(pt, rows)
 }
 
@@ -505,6 +507,7 @@ func (rrs *rawRowsShard) addRows(pt *partition, rows []rawRow) {
 	rrs.mu.Unlock()
 
 	for _, rr := range rrss {
+		//添加
 		pt.addRowsPart(rr.rows)
 		putRawRows(rr)
 	}

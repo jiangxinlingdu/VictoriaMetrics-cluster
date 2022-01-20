@@ -557,7 +557,9 @@ func (db *indexDB) getIndexSearch(accountID, projectID uint32, deadline uint64) 
 			db: db,
 		}
 	}
+	// is 就是 indexSearch
 	is := v.(*indexSearch)
+	//初始化 table
 	is.ts.Init(db.tb)
 	is.accountID = accountID
 	is.projectID = projectID

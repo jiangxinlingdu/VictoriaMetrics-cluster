@@ -299,6 +299,7 @@ func (tb *table) AddRows(rows []rawRow) error {
 		}
 
 		// Fast path - add all the rows into the ptw.
+		//把所有 rows 添加到 ptw 里
 		ptw.pt.AddRows(rows)
 		tb.PutPartitions(ptws)
 		return nil
@@ -362,6 +363,7 @@ func (tb *table) AddRows(rows []rawRow) error {
 			errors = append(errors, err)
 			continue
 		}
+		//添加到 part 中
 		pt.AddRows(missingRows[i : i+1])
 		tb.addPartitionNolock(pt)
 	}

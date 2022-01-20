@@ -68,6 +68,7 @@ func (ts *TableSearch) Init(tb *Table) {
 	ts.tb = tb
 	ts.needClosing = true
 
+	//获取 parts
 	ts.pws = ts.tb.getParts(ts.pws[:0])
 
 	// Initialize the psPool.
