@@ -544,6 +544,7 @@ func (is *indexSearch) GetOrCreateTSIDByName(dst *TSID, metricName []byte) error
 	// TSID for the given name wasn't found. Create it.
 	// It is OK if duplicate TSID for mn is created by concurrent goroutines.
 	// Metric results will be merged by mn after TableSearch.
+	//创建 TSID
 	if err := is.db.createTSIDByName(dst, metricName); err != nil {
 		return fmt.Errorf("cannot create TSID by MetricName %q: %w", metricName, err)
 	}
@@ -582,15 +583,19 @@ func (db *indexDB) putIndexSearch(is *indexSearch) {
 }
 
 func (db *indexDB) createTSIDByName(dst *TSID, metricName []byte) error {
+	//获取指标名称
 	mn := GetMetricName()
 	defer PutMetricName(mn)
+	//编码
 	if err := mn.Unmarshal(metricName); err != nil {
 		return fmt.Errorf("cannot unmarshal metricName %q: %w", metricName, err)
 	}
 
+	// 生成 TSID
 	if err := db.generateTSID(dst, metricName, mn); err != nil {
 		return fmt.Errorf("cannot generate TSID: %w", err)
 	}
+	//创建索引
 	if err := db.createIndexes(dst, mn); err != nil {
 		return fmt.Errorf("cannot create indexes: %w", err)
 	}
@@ -645,6 +650,7 @@ func (db *indexDB) generateTSID(dst *TSID, metricName []byte, mn *MetricName) er
 	return nil
 }
 
+//非常核心内容 创建索引
 func (db *indexDB) createIndexes(tsid *TSID, mn *MetricName) error {
 	// The order of index items is important.
 	// It guarantees index consistency.

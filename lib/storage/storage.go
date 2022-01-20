@@ -1769,6 +1769,7 @@ func (s *Storage) add(rows []rawRow, dstMrs []*MetricRow, mrs []MetricRow, preci
 	rows = rows[:j]
 
 	var firstError error
+	//核心
 	if err := s.tb.AddRows(rows); err != nil {
 		firstError = fmt.Errorf("cannot add rows to table: %w", err)
 	}

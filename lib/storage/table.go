@@ -334,6 +334,7 @@ func (tb *table) AddRows(rows []rawRow) error {
 	// The slowest path - there are rows that don't fit any existing partition.
 	// Create new partitions for these rows.
 	// Do this under tb.ptwsLock.
+	//就是根据之前设置的数据保存时间 获取最小时间 当前时间减设置的保存时间 默认一个月前
 	minTimestamp, maxTimestamp := tb.getMinMaxTimestamps()
 	tb.ptwsLock.Lock()
 	var errors []error
@@ -358,6 +359,8 @@ func (tb *table) AddRows(rows []rawRow) error {
 			continue
 		}
 
+		//在数据目录操作之前，索引目录以及操作完成 即 indexdb 部分
+		//创建  part 这波就是 数据目录 data 下面的 年_月 big 目录 和 small 目录
 		pt, err := createPartition(r.Timestamp, tb.smallPartitionsPath, tb.bigPartitionsPath, tb.getDeletedMetricIDs, tb.retentionMsecs)
 		if err != nil {
 			errors = append(errors, err)
