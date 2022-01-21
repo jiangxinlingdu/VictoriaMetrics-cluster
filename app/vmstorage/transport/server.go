@@ -1061,6 +1061,7 @@ func (s *Server) processVMSelectSearch(ctx *vmselectRequestCtx) error {
 		return ctx.writeErrorMessage(err)
 	}
 	startTime := time.Now()
+	//查询核心逻辑 初始化
 	ctx.sr.Init(s.storage, ctx.tfss, tr, *maxMetricsPerSearch, ctx.deadline)
 	indexSearchDuration.UpdateDuration(startTime)
 	defer ctx.sr.MustClose()

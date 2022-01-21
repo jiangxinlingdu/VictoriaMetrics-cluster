@@ -81,6 +81,7 @@ func (ts *tableSearch) Init(tb *table, tsids []TSID, tr TimeRange) {
 		return
 	}
 
+	//获取 partition (就是 big small 目录 下面的 年_月
 	ts.ptws = tb.GetPartitions(ts.ptws[:0])
 
 	// Initialize the ptsPool.

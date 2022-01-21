@@ -226,6 +226,7 @@ func (ps *partSearch) readIndexBlock(mr *metaindexRow) (*indexBlock, error) {
 	return ib, nil
 }
 
+//核心部分
 func (ps *partSearch) searchBHS() bool {
 	for i := range ps.bhs {
 		bh := &ps.bhs[i]

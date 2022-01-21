@@ -80,6 +80,7 @@ func (pts *partitionSearch) Init(pt *partition, tsids []TSID, tr TimeRange) {
 		return
 	}
 
+	//获取 parts 就是 small big 目录下面的 年_月下面的目录
 	pts.pws = pt.GetParts(pts.pws[:0])
 
 	// Initialize psPool.
