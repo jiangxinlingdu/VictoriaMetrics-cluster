@@ -595,6 +595,7 @@ func (riss *rawItemsShards) flush(tb *Table, isFinal bool) {
 	wg.Add(len(riss.shards))
 	for i := range riss.shards {
 		go func(ris *rawItemsShard) {
+			//开启协程进行  flush
 			ris.flush(tb, isFinal)
 			wg.Done()
 		}(&riss.shards[i])
@@ -621,6 +622,7 @@ func (ris *rawItemsShard) flush(tb *Table, isFinal bool) {
 	ris.mu.Unlock()
 
 	if mustFlush {
+		// 定时 merge
 		tb.mergeRawItemsBlocks(blocksToMerge)
 	}
 }
