@@ -214,11 +214,13 @@ func (ps *partSearch) readIndexBlock(mr *metaindexRow) (*indexBlock, error) {
 	ps.p.indexFile.MustReadAt(ps.compressedIndexBuf, int64(mr.IndexBlockOffset))
 
 	var err error
+	//使用 ZSTD 压缩算法进行解压
 	ps.indexBuf, err = encoding.DecompressZSTD(ps.indexBuf[:0], ps.compressedIndexBuf)
 	if err != nil {
 		return nil, fmt.Errorf("cannot decompress index block: %w", err)
 	}
 	ib := &indexBlock{}
+	// 核心解码获取 BlockHeader
 	ib.bhs, err = unmarshalBlockHeaders(ib.bhs[:0], ps.indexBuf, int(mr.BlockHeadersCount))
 	if err != nil {
 		return nil, fmt.Errorf("cannot unmarshal index block: %w", err)

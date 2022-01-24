@@ -194,6 +194,7 @@ func unmarshalBlockHeaders(dst []blockHeader, src []byte, blockHeadersCount int)
 	}
 	var bh blockHeader
 	for len(src) > 0 {
+		//blockHeader 里面包含了 TimestampsBlockOffset ValuesBlockOffset
 		tmp, err := bh.Unmarshal(src)
 		if err != nil {
 			return dst, fmt.Errorf("cannot unmarshal block header: %w", err)
