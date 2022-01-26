@@ -1931,6 +1931,7 @@ func (is *indexSearch) searchTSIDs(tfss []*TagFilters, tr TimeRange, maxMetrics 
 		// Fast path - the index doesn't contain data for the given tr.
 		return nil, nil
 	}
+	//首先获取 MetricsIDs 后续都是根据 MetricsId 获取 TSID、metricName
 	metricIDs, err := is.searchMetricIDs(tfss, tr, maxMetrics)
 	if err != nil {
 		return nil, err
