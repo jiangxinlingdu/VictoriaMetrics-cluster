@@ -1914,6 +1914,7 @@ func (is *indexSearch) containsTimeRange(tr TimeRange) (bool, error) {
 		}
 		return false, nil
 	}
+	//是否有前缀 nsPrefixDateToMetricID(Prefix for Date->MetricID entries.) 如果没有直接退出了
 	if !bytes.HasPrefix(ts.Item, prefix) {
 		// minDate exceeds max date from ts.
 		return false, nil
