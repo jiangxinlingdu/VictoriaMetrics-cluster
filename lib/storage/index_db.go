@@ -2644,6 +2644,8 @@ func (is *indexSearch) updateMetricIDsForOrSuffixNoFilter(prefix []byte, metricI
 		if loopsCount > maxLoopsCount {
 			return loopsCount, errTooManyLoops
 		}
+
+		//解析 MetricIDs
 		mp.ParseMetricIDs()
 		metricIDs.AddMulti(mp.MetricIDs)
 	}
@@ -2945,6 +2947,7 @@ func (is *indexSearch) getMetricIDsForDateAndFilters(date uint64, tfs *TagFilter
 			continue
 		}
 		maxLoopsCount := getFirstPositiveLoopsCount(tfws[i+1:])
+		//获取 MetricIDs 通过 日期 Tag 过滤
 		m, loopsCount, err := is.getMetricIDsForDateTagFilter(tf, date, tfs.commonPrefix, maxDateMetrics, maxLoopsCount)
 		if err != nil {
 			if errors.Is(err, errTooManyLoops) {
@@ -3225,6 +3228,7 @@ func (is *indexSearch) getMetricIDsForDateTagFilter(tf *tagFilter, date uint64, 
 }
 
 func (is *indexSearch) getLoopsCountAndTimestampForDateFilter(date uint64, tf *tagFilter) (int64, int64, uint64) {
+	//编码 时间 accountID、projectID
 	is.kb.B = appendDateTagFilterCacheKey(is.kb.B[:0], date, tf, is.accountID, is.projectID)
 	kb := kbPool.Get()
 	defer kbPool.Put(kb)
@@ -3232,6 +3236,7 @@ func (is *indexSearch) getLoopsCountAndTimestampForDateFilter(date uint64, tf *t
 	if len(kb.B) != 3*8 {
 		return 0, 0, 0
 	}
+
 	loopsCount := encoding.UnmarshalInt64(kb.B)
 	filterLoopsCount := encoding.UnmarshalInt64(kb.B[8:])
 	timestamp := encoding.UnmarshalUint64(kb.B[16:])
