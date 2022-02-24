@@ -92,6 +92,8 @@ func main() {
 
 	//开启协程  处理插入逻辑
 	go srv.RunVMInsert()
+
+	//开启协程  处理查询逻辑
 	go srv.RunVMSelect()
 
 	requestHandler := newRequestHandler(strg)
