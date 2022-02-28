@@ -179,6 +179,7 @@ func (s *Search) Init(storage *Storage, tfss []*TagFilters, tr TimeRange, maxMet
 	s.deadline = deadline
 	s.needClosing = true
 
+	//根据查询指标以及 lable 获取相应的 TSID 信息
 	tsids, err := storage.searchTSIDs(tfss, tr, maxMetrics, deadline)
 	if err == nil {
 		err = storage.prefetchMetricNames(tsids, deadline)
