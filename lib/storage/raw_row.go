@@ -114,6 +114,7 @@ func (rrm *rawRowsMarshaler) marshalToInmemoryPart(mp *inmemoryPart, rows []rawR
 	for i := range rows {
 		r = &rows[i]
 		if r.TSID.MetricID == tsid.MetricID && len(rrm.auxTimestamps) < maxRowsPerBlock {
+			//每行数据的时间戳 和 时序值
 			rrm.auxTimestamps = append(rrm.auxTimestamps, r.Timestamp)
 			rrm.auxFloatValues = append(rrm.auxFloatValues, r.Value)
 			continue
@@ -125,6 +126,7 @@ func (rrm *rawRowsMarshaler) marshalToInmemoryPart(mp *inmemoryPart, rows []rawR
 
 		tsid = &r.TSID
 		precisionBits = r.PrecisionBits
+		//每行数据的时间戳 和 时序值
 		rrm.auxTimestamps = append(rrm.auxTimestamps[:0], r.Timestamp)
 		rrm.auxFloatValues = append(rrm.auxFloatValues[:0], r.Value)
 	}
