@@ -593,7 +593,11 @@ func (db *indexDB) createTSIDByName(dst *TSID, metricName []byte) error {
 	}
 	//解码之后，mn 里面就 MetricGroup: test, Tags-》key tag1,value 11  key tag2  value value3
 
-	// 生成 TSID
+	// 生成 TSID 规则：
+	//MetricGroupID = xxhash.Sum64(mn.MetricGroup)
+	//JobID = uint32(xxhash.Sum64(mn.Tags[0].Value))
+	//InstanceID = uint32(xxhash.Sum64(mn.Tags[1].Value))
+	//MetricID = generateUniqueMetricID()
 	if err := db.generateTSID(dst, metricName, mn); err != nil {
 		return fmt.Errorf("cannot generate TSID: %w", err)
 	}
