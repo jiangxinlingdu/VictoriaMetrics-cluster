@@ -404,6 +404,8 @@ func (mn *MetricName) Unmarshal(src []byte) error {
 
 	// Unmarshal MetricGroup.
 	var err error
+	//testtag111tag2value3
+	//tagSeparatorChar = 1,指标和 tag 以及 tag 之间的分隔符
 	src, mn.MetricGroup, err = unmarshalTagValue(mn.MetricGroup[:0], src)
 	if err != nil {
 		return fmt.Errorf("cannot unmarshal MetricGroup: %w", err)
