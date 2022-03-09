@@ -601,7 +601,7 @@ func (db *indexDB) createTSIDByName(dst *TSID, metricName []byte) error {
 	if err := db.generateTSID(dst, metricName, mn); err != nil {
 		return fmt.Errorf("cannot generate TSID: %w", err)
 	}
-	//创建索引
+	//创建索引 入参 TSID、MetricName
 	if err := db.createIndexes(dst, mn); err != nil {
 		return fmt.Errorf("cannot create indexes: %w", err)
 	}
@@ -670,23 +670,36 @@ func (db *indexDB) createIndexes(tsid *TSID, mn *MetricName) error {
 	ii.B = append(ii.B, kvSeparatorChar)
 	ii.B = tsid.Marshal(ii.B)
 	ii.Next()
+	//索引这样组织的：nsPrefixMetricNameToTSID MetricName kvSeparatorChar  TSID
+	//nsPrefixMetricNameToTSID AccountID ProjectID Metric名称 tagSeparatorChar 所有 tag1 key tagSeparatorChar value tagSeparatorChar tag2……
+	//kvSeparatorChar AccountID ProjectID MetricGroupID JobID InstanceID MetricID
 
 	// Create MetricID -> MetricName index.
 	ii.B = marshalCommonPrefix(ii.B, nsPrefixMetricIDToMetricName, mn.AccountID, mn.ProjectID)
 	ii.B = encoding.MarshalUint64(ii.B, tsid.MetricID)
 	ii.B = mn.Marshal(ii.B)
 	ii.Next()
+	//索引这样组织的：nsPrefixMetricIDToMetricName AccountID ProjectID  MetricID
+	//AccountID ProjectID Metric名称 tagSeparatorChar 所有 tag1  key tagSeparatorChar value tagSeparatorChar tag2……
 
 	// Create MetricID -> TSID index.
 	ii.B = marshalCommonPrefix(ii.B, nsPrefixMetricIDToTSID, mn.AccountID, mn.ProjectID)
 	ii.B = encoding.MarshalUint64(ii.B, tsid.MetricID)
 	ii.B = tsid.Marshal(ii.B)
 	ii.Next()
+	//索引这样组织的：nsPrefixMetricIDToTSID AccountID ProjectID  MetricID
+	// AccountID ProjectID MetricGroupID JobID InstanceID MetricID
 
 	prefix := kbPool.Get()
 	prefix.B = marshalCommonPrefix(prefix.B[:0], nsPrefixTagToMetricIDs, mn.AccountID, mn.ProjectID)
 	ii.registerTagIndexes(prefix.B, mn, tsid.MetricID)
 	kbPool.Put(prefix)
+	//索引这样组织的：nsPrefixTagToMetricIDs AccountID ProjectID  MetricID
+	//MetricGroup -> MetricID 组织
+	//nil 指标名 tagSeparatorChar metricID 所有 tag1  key tagSeparatorChar value tagSeparatorChar metricID tag2……
+	//compositeTagKeyPrefix len(指标名) 指标名  tag1 key tagSeparatorChar tag1 value tagSeparatorChar metricID
+	//compositeTagKeyPrefix len(指标名) 指标名  tag2 key tagSeparatorChar tag2 value tagSeparatorChar metricID
+
 
 	return db.tb.AddItems(ii.Items)
 }
