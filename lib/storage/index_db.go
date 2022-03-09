@@ -586,10 +586,12 @@ func (db *indexDB) createTSIDByName(dst *TSID, metricName []byte) error {
 	//获取指标名称
 	mn := GetMetricName()
 	defer PutMetricName(mn)
-	//编码
+	// 解码之前，testtag111tag2value3
+	// 进行解码
 	if err := mn.Unmarshal(metricName); err != nil {
 		return fmt.Errorf("cannot unmarshal metricName %q: %w", metricName, err)
 	}
+	//解码之后，mn 里面就 MetricGroup: test, Tags-》key tag1,value 11  key tag2  value value3
 
 	// 生成 TSID
 	if err := db.generateTSID(dst, metricName, mn); err != nil {
