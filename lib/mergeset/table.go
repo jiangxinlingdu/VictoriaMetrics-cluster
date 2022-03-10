@@ -981,6 +981,7 @@ func (tb *Table) mergeParts(pws []*partWrapper, stopCh <-chan struct{}, isOuterP
 	return nil
 }
 
+//获取 ZSTD 压缩级别
 func getCompressLevelForPartItems(itemsCount, blocksCount uint64) int {
 	// There is no need in using blocksCount here, since mergeset blocks are usually full.
 

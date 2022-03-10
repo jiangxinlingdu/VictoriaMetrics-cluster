@@ -59,16 +59,19 @@ func (ip *inmemoryPart) Init(ib *inmemoryBlock) {
 	ip.ph.firstItem = append(ip.ph.firstItem[:0], ib.items[0].String(ib.data)...)
 	ip.ph.lastItem = append(ip.ph.lastItem[:0], ib.items[len(ib.items)-1].String(ib.data)...)
 
+	//写入 items.bin文件
 	fs.MustWriteData(&ip.itemsData, ip.sb.itemsData)
 	ip.bh.itemsBlockOffset = 0
 	ip.bh.itemsBlockSize = uint32(len(ip.sb.itemsData))
 
+	//写入  lens.bin文件
 	fs.MustWriteData(&ip.lensData, ip.sb.lensData)
 	ip.bh.lensBlockOffset = 0
 	ip.bh.lensBlockSize = uint32(len(ip.sb.lensData))
 
 	ip.unpackedIndexBlockBuf = ip.bh.Marshal(ip.unpackedIndexBlockBuf[:0])
 	ip.packedIndexBlockBuf = encoding.CompressZSTDLevel(ip.packedIndexBlockBuf[:0], ip.unpackedIndexBlockBuf, 0)
+	//写入 index.bin文件
 	fs.MustWriteData(&ip.indexData, ip.packedIndexBlockBuf)
 
 	ip.mr.firstItem = append(ip.mr.firstItem[:0], ip.bh.firstItem...)
@@ -77,6 +80,7 @@ func (ip *inmemoryPart) Init(ib *inmemoryBlock) {
 	ip.mr.indexBlockSize = uint32(len(ip.packedIndexBlockBuf))
 	ip.unpackedMetaindexBuf = ip.mr.Marshal(ip.unpackedMetaindexBuf[:0])
 	ip.packedMetaindexBuf = encoding.CompressZSTDLevel(ip.packedMetaindexBuf[:0], ip.unpackedMetaindexBuf, 0)
+	//写入 metaindex.bin文件
 	fs.MustWriteData(&ip.metaindexData, ip.packedMetaindexBuf)
 }
 
