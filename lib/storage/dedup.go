@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -48,9 +49,30 @@ func DeduplicateSamples(srcTimestamps []int64, srcValues []float64) ([]int64, []
 }
 
 func deduplicateSamplesDuringMerge(srcTimestamps, srcValues []int64) ([]int64, []int64) {
-	if minScrapeInterval <= 0 {
+	//if minScrapeInterval <= 0 {
+	//	return srcTimestamps, srcValues
+	//}
+	nowTime := time.Now().UnixNano() / 1e6
+	fmt.Printf("now time: %d\n", nowTime)
+
+	if len(srcTimestamps) < 2 {
 		return srcTimestamps, srcValues
 	}
+
+	minScrapeInterval = int64(15000)
+	if nowTime-srcTimestamps[0] > 7200000 {
+		minScrapeInterval = 15000 * 6
+	} else if nowTime-srcTimestamps[0] > 5400000 {
+		minScrapeInterval = 15000 * 5
+	} else if nowTime-srcTimestamps[0] > 3600000 {
+		minScrapeInterval = 15000 * 4
+	} else if nowTime-srcTimestamps[0] > 1800000 {
+		minScrapeInterval = 15000 * 3
+	} else if nowTime-srcTimestamps[0] > 600000 {
+		minScrapeInterval = 15000 * 2
+	}
+	fmt.Printf("deduplicateSamplesDuringMerge: %d\n", minScrapeInterval)
+
 	if !needsDedup(srcTimestamps, minScrapeInterval) {
 		// Fast path - nothing to deduplicate
 		return srcTimestamps, srcValues
