@@ -63,6 +63,7 @@ type part struct {
 	ibCache   *inmemoryBlockCache
 }
 
+//索引目录
 func openFilePart(path string) (*part, error) {
 	path = filepath.Clean(path)
 

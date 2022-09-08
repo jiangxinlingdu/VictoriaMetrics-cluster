@@ -12,7 +12,7 @@ const (
 	kvSeparatorChar  = 2
 )
 
-func main() {
+func main1() {
 	var b []byte
 	var c1 []byte
 
