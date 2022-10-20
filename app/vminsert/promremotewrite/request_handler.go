@@ -44,9 +44,22 @@ func insertRows(at *auth.Token, timeseries []prompb.TimeSeries, extraLabels []pr
 	hasRelabeling := relabel.HasRelabeling()
 	for i := range timeseries {
 		ts := &timeseries[i]
-		rowsTotal += len(ts.Samples)
 		ctx.Labels = ctx.Labels[:0]
 		srcLabels := ts.Labels
+		/*flag := false
+		for _, srcLabel := range srcLabels {
+			if string(srcLabel.Name) == "__name__" {
+				metricName := string(srcLabel.Value)
+				if metricName == "test" {
+					flag = true
+					break
+				}
+			}
+		}
+		if flag {
+			continue
+		}*/
+		rowsTotal += len(ts.Samples)
 		for _, srcLabel := range srcLabels {
 			ctx.AddLabelBytes(srcLabel.Name, srcLabel.Value)
 		}
