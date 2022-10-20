@@ -52,6 +52,7 @@ type part struct {
 }
 
 // openFilePart opens file-based part from the given path.
+//数据目录
 func openFilePart(path string) (*part, error) {
 	path = filepath.Clean(path)
 
