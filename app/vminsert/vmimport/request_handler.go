@@ -46,8 +46,24 @@ func insertRows(at *auth.Token, rows []parser.Row, extraLabels []prompbmarshal.L
 	hasRelabeling := relabel.HasRelabeling()
 	for i := range rows {
 		r := &rows[i]
-		rowsTotal += len(r.Values)
 		ctx.Labels = ctx.Labels[:0]
+
+		/*		flag := false
+				for j := range r.Tags {
+					tag := &r.Tags[j]
+					if string(tag.Key) == "__name__" {
+						metricName := string(tag.Value)
+						if metricName == "test" {
+							flag = true
+							break
+						}
+					}
+				}
+				if flag {
+					continue
+				}
+		*/rowsTotal += len(r.Values)
+
 		for j := range r.Tags {
 			tag := &r.Tags[j]
 			ctx.AddLabelBytes(tag.Key, tag.Value)
